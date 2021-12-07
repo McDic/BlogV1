@@ -1,8 +1,6 @@
 ---
 title: The first post
 layout: article
-sidebar:
-    nav: layouts
 ---
 
 안녕하세요!

@@ -1,8 +1,6 @@
 ---
 title: PRP 1. Basic principles of probability
 layout: article
-sidebar:
-    nav: layouts
 tags: math probability statistics
 ---
 
@@ -11,8 +9,7 @@ tags: math probability statistics
 교재는 Princeton 대학교의 **[ORF309](https://web.math.princeton.edu/~rvan/ORF309.pdf)**를 참고했습니다.
 
 ---
-
-# Chapter 1. Basic principles of Probability
+# Chapter 1. Basic Principles of Probability
 
 **Sample space**($\Omega$): *Set of all possible outcomes of a random experiment.* 예를 들면, 다음과 같습니다.
 
@@ -188,7 +185,7 @@ $$
 \begin{aligned}
 \sum_{y} E(X | Y=y) P(Y=y) &= \sum_{y} \sum_{x} x P(X=x | Y=y) P(Y=y) \\
 &= \sum_{y} \sum_{x} x P(X=x, Y=y) \\
-&= \sum_{x} x P(x) = E(X)
+&= \sum_{x} x P(X=x) = E(X)
 \end{aligned}
 $$
 
