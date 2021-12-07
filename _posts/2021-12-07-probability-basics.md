@@ -96,7 +96,7 @@ Random variables는 크게 *discrete*, *continuous* 2가지로 나눌 수 있는
 
 **Expectation**: *$X: \Omega \rightarrow D$, $f: D \rightarrow \mathbb{R}$. Then $E(f(X)) = \sum_{i \in D} f(i) P(X = i)$. (for discrete random variables)*
 
-특히, $X$가 *numerical*하면 $\sum_{i \in D} i P(X = i)$ 입니다.
+특히, $X$가 *numerical*하면 $E(X) = \sum_{i \in D} i P(X = i)$ 입니다.
 
 Expectation 계산의 예를 들면..
 
@@ -155,13 +155,7 @@ $$
 
 - 주사위를 6이 나올 때까지 던진다고 가정해봅시다. 주사위를 $k$번 던졌다는 것을 알 때, 주사위의 눈이 $1$이 나온 횟수의 Expectation은 얼마일까요?
 
-$$
-X_i = 
-\begin{cases} 
-1 \text{ if } i \text{-th dice} \\
-0 \text{ else}
-\end{cases}
-$$
+$X_i$를 $i$번째 주사위의 눈이라고 정의합니다.
 
 $$
 \begin{aligned}
@@ -173,7 +167,7 @@ $$
 \end{aligned}
 $$
 
-$X_i$가 서로 independent하지 않다는 점을 염두에 두시기 바랍니다.
+$X_i$가 서로 independent한지 여부를 알지 않고도 문제를 풀 수 있음에 주목해주시기 바랍니다.
 
 **Conditional Distribution**: *$X: \Omega \rightarrow D, Y: \Omega \rightarrow D'$. Collection $P(X=i \| Y=j)_{i \in D, j \in D'}$ is conditional distribution.*
 
@@ -200,6 +194,6 @@ $$
 
 ---
 
-이상으로, Probability에 대해 기본을 훑어보았습니다. Variance 같은 것들이 남아있긴 하지만, *ORF309*에서 이걸 뒷 chapter에서 다루면 뒷 chapter에 해당하는 게시글에, 그렇지 않다면 이 게시글에 추가해두도록 하겠습니다!
+이상으로, Probability에 대해 기본을 훑어보았습니다. *Variance* 같은 것들이 남아있긴 하지만, *ORF309*에서 이걸 뒷 chapter에서 다루면 뒷 chapter에 해당하는 게시글에, 그렇지 않다면 이 게시글에 추가해두도록 하겠습니다!
 
 읽어주셔서 감사합니다.
