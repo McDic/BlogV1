@@ -19,9 +19,9 @@ tags: math probability statistics
 
 **Event**($A$, $B$, etc): *Subset of sample space $\Omega$*. 위 Sample space와 연계되는 예를 들면, 다음과 같습니다.
 
-- 주사위 2개를 던졌는데 그 두 수의 합이 $x$인 경우: $\Omega = \\{ (i, j) \| 1 \le i, j \le 6 \text{ , } i \in \mathbb{N} \text{ , } j \in \mathbb{N} \text{ , } i + j = x \\}$
-- 기다리는 버스가 1시간 안에 올 경우: $\Omega = [0, 1]$
-- 꿀벌이 첫 1초 동안 집($=A$) 안에서만 돌아다니는 모든 경로: $\Omega = \\{ \text{all continuous paths } w: [0, 5] \rightarrow \mathbb{R}^3 \text{ , } w(t) \not \in A \text{ for } t \in [0, 1] \\}$
+- 주사위 2개를 던졌는데 그 두 수의 합이 $x$인 경우: $A = \\{ (i, j) \| 1 \le i, j \le 6 \text{ , } i \in \mathbb{N} \text{ , } j \in \mathbb{N} \text{ , } i + j = x \\}$
+- 기다리는 버스가 1시간 안에 올 경우: $A = [0, 1]$
+- 꿀벌이 첫 1초 동안 집($=House$) 안에서만 돌아다니는 모든 경로: $A = \\{ \text{all continuous paths } w: [0, 5] \rightarrow \mathbb{R}^3 \text{ , } w(t) \in House \text{ for } t \in [0, 1] \\}$
 
 Sample space와 Event는 집합이므로, 임의의 집합 연산($A \cap B, A \cup B, A^C$)이 가능합니다.
 
