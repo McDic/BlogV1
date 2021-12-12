@@ -1,5 +1,5 @@
 ---
-title: PRP 1. Basic principles of probability
+title: PRP 1. Basic Principles of Probability
 layout: article
 tags: series-prp math probability statistics
 ---
