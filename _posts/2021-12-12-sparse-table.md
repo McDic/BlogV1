@@ -2,6 +2,7 @@
 title: ALDS 1. Sparse Table
 layout: article
 tags: series-alds computer-science data-structure
+key: alds-1
 ---
 
 안녕하세요.

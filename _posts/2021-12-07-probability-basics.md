@@ -2,6 +2,7 @@
 title: PRP 1. Basic Principles of Probability
 layout: article
 tags: series-prp math probability statistics
+key: prp-1
 ---
 
 안녕하세요.

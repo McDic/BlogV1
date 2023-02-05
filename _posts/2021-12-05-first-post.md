@@ -1,6 +1,7 @@
 ---
 title: The first post
 layout: article
+key: the-first-post
 ---
 
 안녕하세요!

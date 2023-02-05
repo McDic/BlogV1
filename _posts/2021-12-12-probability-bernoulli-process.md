@@ -2,6 +2,7 @@
 title: PRP 2. Bernoulli Processes
 layout: article
 tags: series-prp math probability statistics
+key: prp-2
 ---
 
 안녕하세요. 이 시리즈의 지난 article에서 *Basic Principles of Probability*에 대해 다뤄봤는데요. 이번에는 *Chapter 2. Bernoulli Processes*에 대해 다뤄보겠습니다.
