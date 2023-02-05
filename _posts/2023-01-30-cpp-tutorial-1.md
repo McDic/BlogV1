@@ -1,5 +1,5 @@
 ---
-title: CPP 1. Type of Expressions and References.
+title: CPP 1. Type of Expressions and References
 layout: article
 tags: series-cpp cpp computer-science
 ---
