@@ -1,5 +1,5 @@
 ---
-title: CPP 1. Type of expressions, references, and move semantics.
+title: CPP 1. Type of Expressions and References.
 layout: article
 tags: series-cpp cpp computer-science
 ---
@@ -28,15 +28,15 @@ C언어와 C++98에서는 expression의 종류를 크게 "lvalue"와 "rvalue"라
 
 ### Have identity vs. Have no identity
 
-Identity를 가진다는 것은, 해당 변수가 그 자체만으로도 식별 가능하다는 것을 의미합니다. 더 자세하게 파면, 서로 다른 두 expression이 온전히 "같은" 값을 가리키고 있는 지 판별하는 것이 가능한 값들을 의미합니다.
+Identity를 가진다는 것은, 해당 변수가 그 자체만으로도 식별 가능하다는 것을 의미합니다. 더 자세하게 파면, 서로 다른 두 expression이 "데이터는 물론 주소까지 같은" 값을 가리키고 있는 지 판별하는 것이 가능한 값들을 의미합니다.
 
 ### Movable vs Unmovable
 
-어떤 expression이 movable하다는 것은, move constructor, move assignment operator, 혹은 move semantics를 구현하는 어떤 함수가 이 expression에 적용 가능한 지를 말합니다. 메모리 상에서 값이 이동 가능한 지를 묻는 것과는 다릅니다!
+어떤 expression이 movable하다는 것은, move constructor, move assignment operator, 혹은 move semantics를 구현하는 어떤 함수가 이 expression에 적용 가능한 지를 말합니다. 메모리 상에서 값이 이동 가능한 지를 묻는 것과는 다릅니다! Move semantics에 대해서는 별도의 포스팅에서 다루도록 하겠습니다.
 
 ---
 
-## glvalue (Generalized Left Value)
+### glvalue (Generalized Left Value)
 
 > glvalue has an identity.
 
@@ -46,7 +46,7 @@ glvalue의 특징은 다음과 같습니다.
 - glvalue는 [polymorphic](https://en.cppreference.com/w/cpp/language/object#Polymorphic_objects)할 수 있습니다.
 - glvalue는 [incomplete type](https://en.cppreference.com/w/cpp/language/type#Incomplete_type)을 가질 수 있습니다.
 
-## rvalue (Right Value)
+### rvalue (Right Value)
 
 > rvalue can be moved.
 
@@ -57,7 +57,7 @@ rvalue의 특징은 다음과 같습니다.
 - rvalue는 "const lvalue reference" 또는 "rvalue reference"가 만들어질 때 쓰일 수 있으며, 그렇게 될 경우 해당 오브젝트의 수명이 더 길어지게 됩니다. (해당 reference가 끝날 때까지로 연장)
 - rvalue가 2개의 overloaded signature(하나는 const lvalue reference, 다른 하나는 rvalue reference를 받는)가 있는 함수의 인자로 들어갔을 때, rvalue reference를 받는 함수가 호출이 됩니다.
 
-## lvalue (Left Value)
+### lvalue (Left Value)
 
 > lvalue has an identity, but cannot be moved.
 
@@ -86,7 +86,7 @@ lvalue로 가능한 값들은 다음 목록과 같습니다.
 - 리턴 타입이 "rvalue reference to function"인 함수 콜(또는 오버로딩된 연산자의 연산)
 - "rvalue reference to function"을 향한 casting: `static_cast<void (&&)(int)>(x)`
 
-## prvalue (Pure Right Value)
+### prvalue (Pure Right Value)
 
 > prvalue has no identity, but can be moved.
 
@@ -112,7 +112,7 @@ prvalue로 가능한 값들은 다음과 같습니다.
 - non-type scalar 템플릿 파라미터
 - 람다 익스프레션: `[](int x){ return x+1; }` 등
 
-## xvalue (eXpiring Value)
+### xvalue (eXpiring Value)
 
 > xvalue has an identity, and also can be moved.
 
@@ -129,4 +129,95 @@ xvalue로 가능한 값들은 다음과 같습니다.
 
 ---
 
-C++
+## Reference
+
+위에서 일부 expression type의 특징을 설명하기 위해 사용된 용어인 `lvalue reference`와 `rvalue reference`에 대해 갸우뚱하실 수도 있을 것 같아, 이에 대한 섹션도 준비해보았습니다.
+
+> Reference stores an address of specific object like pointer, however, the address cannot be changed after it's initialized.
+
+Reference를 initialize하기 위해서는 기본적으로 다음과 같은 syntax를 씁니다. (`T`는 type specifier입니다)
+
+``` C++
+// Basic
+T &ref = ...;
+T &&ref = ...;
+
+// Brace initialization
+T &ref {...};
+T &&ref {...};
+
+// Reference to a function;
+T (&ref) (arg1, arg2, ...) = ...;
+T (&&ref) (arg1, arg2, ...) = ...;
+```
+
+위 코드에서 보실 수 있듯이, 기본적으로 `T&` 또는 `T&&`의 형태를 갖추고 있습니다. 물론, 다음과 같이 한 라인 안에 일반 오브젝트, 레퍼런스, 그리고 포인터를 선언할 수도 있습니다.
+다음 코드에서는 일반 오브젝트 `b`가 `a`를 copy하고, `c`랑 `d`는 `a`를 가리키도록 각각 레퍼런스와 포인터를 선언했습니다.
+
+```cpp
+int main(void) {
+    int a=1;
+    int b=a, &c=a, *d=&a;
+    return 0;
+}
+```
+
+레퍼런스는 기본적으로 오브젝트의 주소를 들고 있지만 일반 오브젝트처럼 동작합니다.
+따라서 다음과 같은 코드는 **레퍼런스의 주소를 바꾸지 않고, 레퍼런스가 홀딩하는 주소의 값을 바꿉니다.**
+다음 코드는 `12`가 아니라 `22`를 출력합니다.
+
+```cpp
+#include <iostream>
+
+int main(void) {
+    int a=1, b=2;
+    int &a_ref = a;
+    a_ref = b; // Change the value of a;
+    std::cout << a << b << std::endl;
+    return 0;
+}
+```
+
+### lvalue reference
+
+lvalue reference는 lvalue expression을 가리키는 레퍼런스를 의미합니다. 단순하게 생각해서 lvalue reference를 만든다는 것은, 어떤 lvalue 오브젝트의 또 다른 이름을 만드는 것이라고 생각하셔도 무방합니다.
+Initialize/declare시 `T &ref`로 표현됩니다.
+
+일반적으로 lvalue reference는 오직 lvalue를 통해서만 만들어질 수 있지만, 예외적으로 const lvalue reference는 rvalue를 통해서도 만들어질 수 있습니다. (단, modify는 못합니다.)
+
+```cpp
+int main(void) {
+    int original = 1;
+    int &ref1 = original;
+    const int &ref2 = 1;
+    return 0;
+}
+```
+
+### rvalue reference
+
+rvalue reference는 rvalue expression(= prvalue + xvalue)을 가리키는 레퍼런스를 의미합니다.
+temporary object들의 lifetime을 연장하기 위해, 또는 move semantics를 구현하기 위해 자주 사용됩니다. const lvalue reference 또한
+Initialize/declare시 `T &&ref`로 표현됩니다.
+
+rvalue reference를 제대로 설명하기 위해서는 move semantics에 대한 설명이 필요합니다. 이에 대해서는 부가적인 포스팅에서 제대로 다뤄보도록 하겠습니다.
+간단히 요약하면, move semantics를 사용하면 `a = b` 등을 할 때 메모리 상에서 존재하는 실제 값의 이동이 필요하지 않고, 대신에 다른 변수가 이 주소를 가리키도록 할 수 있습니다.
+
+```cpp
+#include <utility>
+
+int main(void) {
+    int &&r_ref = (1+2)*3;
+    int original = 4;
+    int &&r_ref2 = std::move(original);
+    return 0;
+}
+```
+
+---
+
+지금까지 Expression Type, lvalue reference, rvalue reference에 대해 알아보았습니다.
+새 회사에 들어가서 C++를 공부하는 과정에서 C++의 많은 부분을 간략하게 커버하게 되었는데, 포스팅을 작성하면서 조금 더 딥하게 커버해보도록 하겠습니다.
+다만 [C++ Reference 웹사이트](https://en.cppreference.com/w/)와 [Microsoft C++ References](https://learn.microsoft.com/en-us/cpp/cpp/cpp-language-reference?view=msvc-170)를 복붙하는 느낌도 없지 않아 들어서.. 최대한 저만의 방식으로 전달할 수 있도록 노력해야겠다는 생각도 많이 들었습니다.
+
+이상으로, C++ 시리즈의 첫 포스팅을 마치겠습니다. 감사합니다.
