@@ -23,7 +23,6 @@ layout: article
 #   fr-FR   : *FR
 #   fr-LU   : *FR
 #   # @end locale config
-key: page-about
 ---
 
 # THIS PAGE IS DEPRECATED
