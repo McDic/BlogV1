@@ -138,7 +138,7 @@ xvalue로 가능한 값들은 다음과 같습니다.
 
 Reference를 initialize하기 위해서는 기본적으로 다음과 같은 syntax를 씁니다. (`T`는 type specifier입니다)
 
-``` C++
+```cpp
 // Basic
 T &ref = ...;
 T &&ref = ...;
@@ -176,6 +176,20 @@ int main(void) {
     a_ref = b; // Change the value of a;
     std::cout << a << b << std::endl;
     return 0;
+}
+```
+
+Reference to the pointer(포인터를 향한 레퍼런스)는 가능합니다.
+하지만 pointer to the reference(레퍼런스를 향한 포인터)는 언어 차원에서 금지되어 있습니다.
+레퍼런스 자체는 기본적으로 어떤 value의 alias이기 때문입니다.
+
+```cpp
+int main(void) {
+    int original;
+    int &ref = original;
+    int *ptr = &original;
+    int *&ref_to_ptr = ptr;
+    // int &*ptr_to_ref = &original; // Compile Error!
 }
 ```
 
