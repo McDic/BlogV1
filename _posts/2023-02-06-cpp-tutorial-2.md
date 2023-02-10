@@ -143,11 +143,11 @@ class Lmulti: public Lpublic, private Lprivate {};
 
 다음 표는 각 inheritance 종류에 대해 자식 클래스가 가지게 되는 부모 클래스 멤버에 대한 접근 권한을 나타낸 것입니다.
 
-| | public member | protected member | private member | 
-| -- | -- | -- | -- |
-| public inheritance | remains same | remains same | inaccessible |
-| protected inheritance | becomes protected | remains same | inaccessible |
-| private inheritance | becomes private | becomes private | inaccessible |
+|                       | public member     | protected member | private member |
+| --------------------- | ----------------- | ---------------- | -------------- |
+| public inheritance    | remains same      | remains same     | inaccessible   |
+| protected inheritance | becomes protected | remains same     | inaccessible   |
+| private inheritance   | becomes private   | becomes private  | inaccessible   |
 
 ### Difference between `class` and `struct`
 
@@ -291,9 +291,188 @@ C++에서 `class`와 `struct` 사이의 유일한 차이는 바로 default acces
     class A {
     private:
         int member;
+    public:
         void f(A x1, A x2) {
             x1.member;
             x2.member;
         }
     };
     ```
+
+---
+
+## Friend
+
+Access specifier는 분명히 유용한 기능입니다.
+하지만 경우에 따라 일부 함수가 예외적으로 protected 또는 private member에 접근하는 것이 필요할 때가 있습니다.
+그럴 때 바로 다음 코드와 같이 `friend` 키워드를 사용합니다.
+
+```cpp
+class A {
+private:
+    int x;
+    friend int f(); // Grant access to f
+    friend class B; // Grant access to all members of B
+};
+
+int f() {
+    A a;
+    return a.x;
+}
+
+class B {
+private:
+    void g1() {
+        x;
+    }
+    void g2() {
+        f();
+    }
+};
+```
+
+어떤 클래스 `A` 안에서 `B`가 friend로 선언되었다는 것은, `A`의 모든 멤버에 대한 접근 권한을 `B`에게로 주었다는 뜻입니다. 반대가 아닙니다!
+
+### Details
+
+- 어떤 클래스의 friend의 friend는 해당 클래스의 friend가 아닙니다. (friend 관계는 non-transitive합니다.)
+    ```cpp
+    class A {
+        int member;
+        friend class B;
+    };
+
+    class B {
+        friend class C;
+    };
+
+    class C {
+        void f(A a) {
+            // a.member; // Compile error!
+        }
+    };
+    ```
+- 어떤 클래스의 friend의 자식은 해당 클래스의 friend가 아닙니다. (friendship은 상속되지 않습니다.)
+    ```cpp
+    class A {
+        int member;
+        friend class B1;
+    };
+
+    class B1 {};
+
+    class B2: public B1 {
+        void f(A a) {
+            // a.member; // Compile Error!
+        }
+    };
+    ```
+- `register`, `static` 등의 *Storage Class Specifiers*는 friend function declaration에서 허용되지 않습니다.
+    ```cpp
+        class A {
+        int member;
+        // friend static void f(); // Compile Error!
+    };
+
+    void f() {}
+    ```
+- Access specifier들은 friend 정의에 그 어떤 영향도 미치지 않습니다.
+    ```cpp
+    class L1 {
+        // friend class L2 {}; // Compile Error!
+    };
+    ```
+- 로컬 클래스가 friend declaration을 하면, 해당 클래스가 속한 scope에서만 그 이름을 탐색합니다.
+    ```cpp
+    class C {};
+
+    void f();
+
+    int main() {
+        
+        void g();
+
+        class LocalClass {
+            // friend void f(); // Compile Error!
+            friend void g(); // OK
+            friend class C; // Local C
+            friend class ::C; // Global C
+        };
+
+        class C {};
+    }
+    ```
+
+### Template Friends
+
+Template와 friend는 섞어서 쓸 수 있습니다. `template`를 friend declaration에 사용할 경우, 해당 템플릿이 가질 수 있는 모든 specialization으로 만들어지는 함수 또는 클래스가 해당 클래스의 `friend`가 됩니다.
+
+```cpp
+class A {
+    template <class T> friend class B; // Every F<T> is a friend
+    template <class T> friend void f() {} // Every f<T> is a friend
+};
+```
+
+Friend declaration에는 partial specialization도, explicit specialization도 올 수 없지만, full specialization은 올 수 있습니다.
+
+```cpp
+template <class T, class V> class C {}; // Primary
+template <class T> class C<T, int> {}; // Partial specialization
+template <> class C<char*, int> {}; // Full specialization
+
+class X {
+    template <class T, class V> friend class C;
+    // template <class T> friend class C<T, int>; // Compile Error!
+    friend class C<char*, int>;
+    // template <> friend class C<char*, int>; // Compile Error!
+};
+```
+
+만약 friend function declaration이 full specialization을 참조한다면, 해당 함수에는 `inline`이나 default argument가 쓰일 수 없습니다.
+
+```cpp
+template <class T> void f(int) {}
+template <> void f<double>(int) {}
+template <> inline void f<char>(int) {}
+
+class C {
+    // friend void f<double>(int x=1); // Compile Error!
+    // friend inline void f<char>(int); // Compile Error!
+};
+```
+
+Template friend declaration을 했을 때, 일부 function specialization의 함수 signature가 다르다면, 해당 함수는 friend 효과를 받지 못합니다.
+
+```cpp
+template <class T> class Bouter {
+    struct Binner {}; // Can access A
+    void f(); // Can access A
+};
+
+template <> class Bouter<int> {
+    struct Binner {}; // Can access A
+    char f(); // Can't access A
+};
+
+class A {
+    static int x;
+    template <class T> friend struct Bouter<T>::Binner;
+    template <class T> friend void f();
+};
+
+template <class T> void Bouter<T>::f() {
+    A::x;
+}
+
+char Bouter<int>::f() {
+    // A::x; // Compile Error!
+}
+```
+
+모든 operator function 또한 template 유무에 상관없이 friend의 효과를 일반 function과 똑같이 받을 수 있습니다.
+
+---
+
+지금까지 access specifier와 friend에 대하여 알아보았습니다.
+다음 포스팅에서 찾아뵙도록 하겠습니다! 감사합니다.
