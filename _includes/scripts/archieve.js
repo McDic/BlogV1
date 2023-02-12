@@ -34,6 +34,7 @@
   })();
 
   window.Lazyload.js(SOURCES.jquery, function() {
+    var $titleComponent = $('.article__header');
     var $tags = $('.js-tags');
     var $articleTags = $tags.find('button');
     var $tagShowAll = $tags.find('.tag-button--all');
@@ -130,6 +131,13 @@
     $tags.on('click', 'button', function() {
       tagSelect($(this).data('encode'), $(this));
     });
+    if (query.nosearch == 'true') {
+      $titleComponent.hide();
+      $articleTags.hide();
+    } else {
+      $titleComponent.show();
+      $articleTags.show();
+    }
 
   });
 })();

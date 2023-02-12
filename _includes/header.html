@@ -25,7 +25,7 @@
           {%- assign _mcdic_tags = site.tags | sort -%}
           {%- capture _mcdic_literal_series -%}{{ 'series-' }}{%- endcapture -%}
           {%- assign _mcdic_literal_series_size = _mcdic_literal_series | size -%}
-          {%- assign _mcdic_tag_basepath = site.paths.archive | default: site.data.variables.default.paths.archive | append: '?tag=' -%}
+          {%- assign _mcdic_tag_basepath = site.paths.archive | default: site.data.variables.default.paths.archive | append: '?nosearch=true&tag=' -%}
           {%- for _mcdic_tag in _mcdic_tags -%}
             {%- assign _mcdic_this_tag = _mcdic_tag[0] | strip -%}
             {%- assign _mcdic_this_tag_sliced = _mcdic_this_tag | slice: 0, _mcdic_literal_series_size -%}
