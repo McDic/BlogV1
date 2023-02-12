@@ -25,13 +25,14 @@
           {%- assign _mcdic_tags = site.tags | sort -%}
           {%- capture _mcdic_literal_series -%}{{ 'series-' }}{%- endcapture -%}
           {%- assign _mcdic_literal_series_size = _mcdic_literal_series | size -%}
+          {%- assign _mcdic_tag_basepath = site.paths.archive | default: site.data.variables.default.paths.archive | append: '?tag=' -%}
           {%- for _mcdic_tag in _mcdic_tags -%}
             {%- assign _mcdic_this_tag = _mcdic_tag[0] | strip -%}
             {%- assign _mcdic_this_tag_sliced = _mcdic_this_tag | slice: 0, _mcdic_literal_series_size -%}
             {%- if _mcdic_literal_series == _mcdic_this_tag_sliced -%}
-              {%- assign _mcdic_page_url = '/archive.html/?tag=' | append: _mcdic_this_tag -%}
+              {%- assign _mcdic_page_url = _mcdic_tag_basepath | append: _mcdic_this_tag -%}
               <li class="navigation__item"><a href="{{ _mcdic_page_url }}">{{ _mcdic_this_tag | upcase | slice: _mcdic_literal_series_size, 999999999 }}</a></li>
-            {%- endif -%}
+              {%- endif -%}
           {%- endfor -%}
           {%- for _item in site.data.navigation.header -%}
             {%- include snippets/get-nav-url.html path=_item.url -%}
@@ -45,11 +46,12 @@
               <li class="navigation__item"><a href="{{ _nav_url }}">{%- if _item.title -%}{{ _item.title }}{%- else -%}{{ __return }}{%- endif -%}</a></li>
             {%- endif -%}
           {%- endfor -%}
-          {%- if site.search.provider -%}
-            <li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li>
-          {%- endif -%}
         </ul>
       </nav>
+      {%- endif -%}
+      {%- if site.search.provider -%}
+        <hr>
+        <button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button>
       {%- endif -%}
     </div>
   </header>
