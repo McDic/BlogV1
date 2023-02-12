@@ -196,7 +196,14 @@ C++에서 `class`와 `struct` 사이의 유일한 차이는 바로 default acces
         L1::L2public x;
     }
     ```
-- Default function argument
+- Default function argument은 friend function declaration에 쓰일 수 없습니다.
+    ```cpp
+    void f(int x=1) {}
+
+    class A {
+        // friend void f(int x=1); // Compile Error!
+    };
+    ```
 - Access specifier에는 polymorphism이 적용되지 않습니다. 모든 expression의 access 범위는 해당 expression이 "컴파일 타임"에 가지는 변수 타입에 의해 결정됩니다. 이를 통해 access specifier를 우회할 수 있습니다.
     ```cpp
     #include <iostream>
@@ -369,7 +376,7 @@ private:
     ```
 - `register`, `static` 등의 *Storage Class Specifiers*는 friend function declaration에서 허용되지 않습니다.
     ```cpp
-        class A {
+    class A {
         int member;
         // friend static void f(); // Compile Error!
     };
@@ -377,6 +384,7 @@ private:
     void f() {}
     ```
 - Access specifier들은 friend 정의에 그 어떤 영향도 미치지 않습니다.
+- Local class는 friend class definition으로 정의될 수 없습니다.
     ```cpp
     class L1 {
         // friend class L2 {}; // Compile Error!
