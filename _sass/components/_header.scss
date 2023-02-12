@@ -92,17 +92,24 @@
       padding-bottom: 4px;
       margin: -4px 0 0 0;
     }
-    @include menu(3, 2, nowrap);
+    @include menu(3, 2, wrap);
     @include align-items(center);
     @include media-breakpoint-down(md) {
       height: auto;
     }
-    .search-button {
-      @include media-breakpoint-down(md) {
-        display: none;
-      }
-    }
   }
+}
+
+hr {
+  min-width: 10px;
+  border: none
+}
+
+.search-button {
+  @include media-breakpoint-down(md) {
+    display: none;
+  }
+  height: auto;
 }
 
 .navigation__item {
