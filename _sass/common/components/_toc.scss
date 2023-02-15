@@ -3,6 +3,7 @@ ul.toc {
   margin: 0;
   color: $text-color;
   list-style-type: none;
+  overflow-wrap: break-word;
   & > li {
     margin: map-get($spacers, 1) / 2 0;
     a {
@@ -79,7 +80,6 @@ ul.toc--ellipsis {
   & > li {
     @include overflow(hidden);
     text-overflow: ellipsis;
-    white-space: nowrap;
   }
 }
 
