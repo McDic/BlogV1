@@ -359,7 +359,6 @@ int main(void) {
 
 ## Class Templates
 
-Class templates에 관해서 말씀드릴 부분은 많지는 않습니다.
 Template class를 정의하는 syntax는 다음과 같습니다.
 
 ```
@@ -429,6 +428,71 @@ int main(void) {
     // std::cout << A<double>::y << '\n'; // Compile Error!
     // std::cout << A<int>::x << '\n'; // Compile Error!
     std::cout << A<int>::y << '\n';
+}
+```
+
+### Class Template Argument Deduction (CTAD)
+
+Function template 뿐만 아니라, class template에 대해서도 template argument deduction이 작용합니다.
+이를 [CTAD](https://en.cppreference.com/w/cpp/language/class_template_argument_deduction)라고 합니다.
+
+#### Implicit CTAD
+
+프로그래머가 특별히 지정해주지 않아도, 이미 정의되어 있는 생성자 또는 자동으로 생성되는 copy/move constructor를 통해 deduce되는 것을 *implicit CTAD*라고 합니다.
+
+```cpp
+template <class T> struct A {
+    A(T, T) {}
+};
+
+int main(void) {
+    A a = A{1.0, 2.0};
+    auto a2 = A(a);
+    auto a_ptr = new A{1, 2};
+    delete a_ptr;
+}
+```
+
+#### User-defined CTAD
+
+다음과 같은 syntax를 사용하여 직접 CTAD를 정의할 수 있습니다.
+
+```
+template_name (...) -> template_id;
+```
+
+물론 이 syntax 앞에 `template <...>` 를 붙여서 CTAD를 generic하게 정의하는 것 또한 가능합니다.
+또한, `explicit`이 `template_name` 앞에 optional하게 붙을 수 있는데요.
+이 경우 기존 클래스 constructor에 [`explicit`](https://en.cppreference.com/w/cpp/language/explicit)이 붙는 효과와 동일한 효과가 작용합니다. (Copy initialization이 허용되지 않습니다)
+다음 코드는 CTAD를 직접 정의하는 예시입니다.
+
+```cpp
+#include <string>
+
+template <class T1, class T2> struct Employee {
+    T1 name; T2 salary;
+    Employee(T1 &name_): name(name_), salary(0) {}
+    Employee(T1 &&name_): name(name_), salary(0) {}
+    Employee(T1 name_, T2 salary_): name(name_), salary(salary_) {}
+};
+
+explicit Employee(const char*, int) -> Employee<std::string, double>;
+// template <class T> explicit Employee(T) -> Employee<T, double>;
+template <class T> Employee(T&) -> Employee<T, double>;
+
+int main(void) {
+    
+    // <std::string, double> instead of <const char*, int>
+    auto e1 = Employee("McDic", 1234); 
+    // Employee e1b = {"McDic", 1234}; // Compile Error! (explicit)
+
+    // <T, double> where T = const char[6]
+    auto e2 = Employee("McDic");
+    Employee e2b = "McDic"; // OK, non-explicit
+    
+    char name = 'M';
+    auto e3 = Employee(name);
+    // auto e4 = Employee('M'); // Compile Error! (Can't deduce T2)
 }
 ```
 
@@ -680,6 +744,99 @@ int main(void) {
     recursive<3>();
 }
 ```
+
+---
+
+## Variadic Templates (Parameter Pack)
+
+[Variadic templates](https://learn.microsoft.com/en-us/cpp/cpp/ellipses-and-variadic-templates?view=msvc-170) 또는 [Parameter pack](https://en.cppreference.com/w/cpp/language/parameter_pack)이란, 임의의 개수의 템플릿 파라미터를 가지는 템플릿을 의미합니다.
+Syntax는 다음과 같습니다.
+
+```
+template <something T...> blabla;
+```
+
+다음 코드는 템플릿 파라미터들의 합을 구하는 sum function의 예시입니다.
+`sum1`은 같은 타입 `T` 파라미터를 몇 개든 받을 수 있습니다.
+
+```cpp
+#include <iostream>
+
+template <class T> T sum1() { return T{0}; }
+// template <class T, T v1> T sum1() { return v1; } // Ambiguous!
+template <class T, T v1, T... v2> T sum1() {
+    return v1 + sum1<T, v2...>();
+}
+
+int main(void) {
+    std::cout << sum1<int, 1>() << '\n';
+    std::cout << sum1<int, 1, 2>() << '\n';
+    std::cout << sum1<int, 1, 2, 3>() << '\n';
+}
+```
+
+다음 코드는 파라미터들을 print하는 print function의 예시입니다. `print`는 서로 다른 타입(`Types...`)의 파라미터를 몇 개든 받을 수 있습니다.
+
+```cpp
+#include <iostream>
+
+template <class T> void print(std::ostream &out, T value) {
+    out << value << std::endl;
+}
+
+template <class T, class... Types> void print(std::ostream &out, T value, Types... values) {
+    out << value << ' ';
+    print(out, values...);
+}
+
+int main(void) {
+    print(std::cout, 1, 2.3, "abc");
+}
+```
+
+### Fold Expression
+
+Fold expression이란, binary operator 하나로 parameter pack의 모든 원소를 연산시키는 것을 의미합니다.
+Syntax 및 각 syntax에 연결되는 결과는 다음과 같습니다.
+
+1. `(E op ...)` -> `E1 op (E2 op ( ... (E[N-1] op E[N])))`
+2. `(... op E)` -> `((E1 op E2) op ... ) op E[N]`
+3. `(E op ... op I)` -> `E1 op (E2 op ... (E[N-1] op (E[N] op I)))`
+4. `(I op ... op E)` -> `(((I op E1) op E2) op ... ) op E[N]`
+
+보통 동일한 연산자를 여러 번 적용하는 연산의 경우 왼쪽부터 오른쪽으로 accumulate하는 경우가 많은데, 그게 2번, 4번의 syntax라는 점을 주의하셔야 할 것 같습니다.
+
+다음 코드는 fold expression을 사용하는 예시입니다.
+
+```cpp
+#include <iostream>
+
+template <class... Args> int any(Args... bools) {
+    return (int)(... || bools);
+}
+
+int main(void) {
+    std::cout << any(false, false, false) << any(false, false, true) << '\n';
+}
+```
+
+Fold expression을 사용하실 때는 몇 가지를 주의하셔야 합니다.
+
+1. Fold expression 바깥에 반드시 syntax에 써진 대로 괄호를 써줘야 합니다.
+2. Fold expression의 init 값에 단순 값이 아닌 수식을 넣을 경우, 괄호로 감싸주어야 합니다.
+    ```cpp
+    #include <iostream>
+
+    template <int Init, class... Args>
+    int sum_with_double_init(Args... args) {
+        // return (Init * 2 + ... + args);
+        return ((Init * 2) + ... + args);
+    }
+
+    int main(void) {
+        std::cout << sum_with_double_init<5>(1, 2, 3) << '\n';
+    }
+    ```
 
 ---
 
