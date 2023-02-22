@@ -359,7 +359,6 @@ int main(void) {
 
 ## Class Templates
 
-Class templates에 관해서 말씀드릴 부분은 많지는 않습니다.
 Template class를 정의하는 syntax는 다음과 같습니다.
 
 ```
@@ -429,6 +428,71 @@ int main(void) {
     // std::cout << A<double>::y << '\n'; // Compile Error!
     // std::cout << A<int>::x << '\n'; // Compile Error!
     std::cout << A<int>::y << '\n';
+}
+```
+
+### Class Template Argument Deduction (CTAD)
+
+Function template 뿐만 아니라, class template에 대해서도 template argument deduction이 작용합니다.
+이를 [CTAD](https://en.cppreference.com/w/cpp/language/class_template_argument_deduction)라고 합니다.
+
+#### Implicit CTAD
+
+프로그래머가 특별히 지정해주지 않아도, 이미 정의되어 있는 생성자 또는 자동으로 생성되는 copy/move constructor를 통해 deduce되는 것을 *implicit CTAD*라고 합니다.
+
+```cpp
+template <class T> struct A {
+    A(T, T) {}
+};
+
+int main(void) {
+    A a = A{1.0, 2.0};
+    auto a2 = A(a);
+    auto a_ptr = new A{1, 2};
+    delete a_ptr;
+}
+```
+
+#### User-defined CTAD
+
+다음과 같은 syntax를 사용하여 직접 CTAD를 정의할 수 있습니다.
+
+```
+template_name (...) -> template_id;
+```
+
+물론 이 syntax 앞에 `template <...>` 를 붙여서 CTAD를 generic하게 정의하는 것 또한 가능합니다.
+또한, `explicit`이 `template_name` 앞에 optional하게 붙을 수 있는데요.
+이 경우 기존 클래스 constructor에 [`explicit`](https://en.cppreference.com/w/cpp/language/explicit)이 붙는 효과와 동일한 효과가 작용합니다. (Copy initialization이 허용되지 않습니다)
+다음 코드는 CTAD를 직접 정의하는 예시입니다.
+
+```cpp
+#include <string>
+
+template <class T1, class T2> struct Employee {
+    T1 name; T2 salary;
+    Employee(T1 &name_): name(name_), salary(0) {}
+    Employee(T1 &&name_): name(name_), salary(0) {}
+    Employee(T1 name_, T2 salary_): name(name_), salary(salary_) {}
+};
+
+explicit Employee(const char*, int) -> Employee<std::string, double>;
+// template <class T> explicit Employee(T) -> Employee<T, double>;
+template <class T> Employee(T&) -> Employee<T, double>;
+
+int main(void) {
+    
+    // <std::string, double> instead of <const char*, int>
+    auto e1 = Employee("McDic", 1234); 
+    // Employee e1b = {"McDic", 1234}; // Compile Error! (explicit)
+
+    // <T, double> where T = const char[6]
+    auto e2 = Employee("McDic");
+    Employee e2b = "McDic"; // OK, non-explicit
+    
+    char name = 'M';
+    auto e3 = Employee(name);
+    // auto e4 = Employee('M'); // Compile Error! (Can't deduce T2)
 }
 ```
 
@@ -727,18 +791,6 @@ template <class T, class... Types> void print(std::ostream &out, T value, Types.
 
 int main(void) {
     print(std::cout, 1, 2.3, "abc");
-}
-```
-
-다음 코드와 같이 variadic args는 template argument로 있을 때는 deduction 과정에서 무시되지만, function argument로 있을 때는 function overloading으로 취급됩니다.
-
-```cpp
-template <class T> int h() { return 1; }
-// template <class T, class... Ts> int h() { return 2;} // Compile Error!
-template <class T, class... Ts> int h(Ts...) { return 3; }
-
-int main() {
-    std::cout << h<int>() << '\n';
 }
 ```
 
