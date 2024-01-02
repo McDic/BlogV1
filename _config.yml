@@ -118,7 +118,7 @@ sharing:
 ## => Comments
 ##############################
 comments:
-  provider: gitalk  # false (default), "disqus", "gitalk", "valine", "custom"
+  provider: custom  # false (default), "disqus", "gitalk", "valine", "custom"
 
   ## Disqus
   disqus:
@@ -127,8 +127,8 @@ comments:
   ## Gitalk
   # please refer to https://github.com/gitalk/gitalk for more info.
   gitalk:
-    clientID    : ba5427df88d4a375958c  # GitHub Application Client ID
-    clientSecret: 54b1713c07aa41efca5ec7faa2d34d14da95178c  # GitHub Application Client Secret
+    clientID    : # GitHub Application Client ID
+    clientSecret: # GitHub Application Client Secret
     repository  : McDic.github.io  # GitHub repo
     owner       : McDic  # GitHub repo owner
     admin: # GitHub repo owner and collaborators, only these guys can initialize GitHub issues, IT IS A LIST.
